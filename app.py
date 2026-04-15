@@ -5,10 +5,14 @@ from langchain_pinecone import PineconeVectorStore
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
+from pinecone import Pinecone
 
 # --- Load API Keys ---
 os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 os.environ["PINECONE_API_KEY"] = st.secrets["PINECONE_API_KEY"]
+
+# --- Initialize Pinecone explicitly ---
+pc = Pinecone(api_key=st.secrets["PINECONE_API_KEY"])
 
 # --- Setup ---
 embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
@@ -19,7 +23,7 @@ vectorstore = PineconeVectorStore(
     embedding=embeddings
 )
 
-retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
 llm = ChatOpenAI(model="gpt-4", temperature=0)
 
 prompt = ChatPromptTemplate.from_template("""
