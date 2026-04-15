@@ -11,7 +11,7 @@ from pinecone import Pinecone
 os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 os.environ["PINECONE_API_KEY"] = st.secrets["PINECONE_API_KEY"]
 
-# --- Initialize Pinecone explicitly ---
+# --- Initialize Pinecone ---
 pc = Pinecone(api_key=st.secrets["PINECONE_API_KEY"])
 
 # --- Setup ---
@@ -48,5 +48,15 @@ query = st.text_input("Your question:")
 
 if query:
     with st.spinner("Searching the IES Lighting Handbook..."):
+        # Debug: show retrieved documents
+        docs = retriever.invoke(query)
+        st.write(f"**Retrieved {len(docs)} documents:**")
+        for i, doc in enumerate(docs):
+            st.write(f"**Chunk {i+1}:**")
+            st.write(doc.page_content[:300])
+            st.divider()
+
+        # Answer
         response = chain.invoke(query)
+        st.write("**Answer:**")
         st.write(response)
