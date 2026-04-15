@@ -1,7 +1,7 @@
 import streamlit as st
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_pinecone import PineconeVectorStore
-from langchain.chains import RetrievalQA
+from langchain_community.chains import RetrievalQA
 
 # --- Setup ---
 embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
