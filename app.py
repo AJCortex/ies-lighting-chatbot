@@ -1,7 +1,10 @@
 import streamlit as st
+import os
 from langchain_openai import OpenAIEmbeddings, ChatOpenAI
 from langchain_pinecone import PineconeVectorStore
-from langchain_community.chains import RetrievalQA
+from langchain.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from langchain_core.runnables import RunnablePassthrough
 
 # --- Setup ---
 embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
@@ -14,7 +17,20 @@ vectorstore = PineconeVectorStore(
 
 retriever = vectorstore.as_retriever()
 llm = ChatOpenAI(model="gpt-4", temperature=0)
-qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever)
+
+prompt = ChatPromptTemplate.from_template("""
+Answer the question based only on the following context:
+{context}
+
+Question: {question}
+""")
+
+chain = (
+    {"context": retriever, "question": RunnablePassthrough()}
+    | prompt
+    | llm
+    | StrOutputParser()
+)
 
 # --- UI ---
 st.title("IES Lighting Handbook Chatbot")
@@ -24,5 +40,5 @@ query = st.text_input("Your question:")
 
 if query:
     with st.spinner("Searching..."):
-        response = qa_chain.invoke(query)
-        st.write(response["result"])
+        response = chain.invoke(query)
+        st.write(response)
