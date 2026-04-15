@@ -6,6 +6,10 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 
+# --- Load API Keys ---
+os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+os.environ["PINECONE_API_KEY"] = st.secrets["PINECONE_API_KEY"]
+
 # --- Setup ---
 embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 index_name = "ies-lighting-handbook-qa"
@@ -15,7 +19,7 @@ vectorstore = PineconeVectorStore(
     embedding=embeddings
 )
 
-retriever = vectorstore.as_retriever()
+retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
 llm = ChatOpenAI(model="gpt-4", temperature=0)
 
 prompt = ChatPromptTemplate.from_template("""
@@ -39,6 +43,6 @@ st.write("Ask any question about the IES Lighting Handbook")
 query = st.text_input("Your question:")
 
 if query:
-    with st.spinner("Searching..."):
+    with st.spinner("Searching the IES Lighting Handbook..."):
         response = chain.invoke(query)
         st.write(response)
