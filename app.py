@@ -42,20 +42,21 @@ rewrite_chain = rewrite_prompt | llm | StrOutputParser()
 # --- Answer Prompt ---
 prompt = ChatPromptTemplate.from_template("""
 You are an expert on the IES Lighting Handbook 10th Edition. 
-Use the following context to answer the question. 
-If the context references a table by name, use your knowledge of IES 
-lighting standards to provide the specific values from that table.
-If you cannot find exact values, provide general IES guidance on the topic.
+Use the following context to answer the question concisely.
+If the context references a table by name, provide the specific values.
+If you cannot find exact values, provide brief general IES guidance.
 
-IMPORTANT: Do not reference document IDs, chunk IDs, or any internal 
-identifiers in your response. Only cite table numbers and page numbers 
-when referencing sources.
+IMPORTANT: 
+- Keep answers to 3-5 sentences maximum
+- Lead with the specific answer or numbers first
+- Do not reference document IDs or chunk IDs
+- Only cite table numbers when referencing sources
 
 Context: {context}
 
 Question: {question}
 
-Provide specific lux or footcandle values where relevant.
+Provide specific lux or footcandle values where relevant. Be concise.
 """)
 
 # --- Chain ---
