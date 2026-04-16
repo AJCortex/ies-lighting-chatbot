@@ -71,7 +71,7 @@ query = st.text_input("Your question:")
 if query:
     with st.spinner("Searching the IES Lighting Handbook..."):
         technical_query = rewrite_chain.invoke({"question": query})
-        docs = retriever.invoke(technical_query)
+        
         response = chain.invoke(technical_query)
         st.write("**Answer:**")
         st.write(response)
