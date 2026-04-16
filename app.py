@@ -23,7 +23,7 @@ vectorstore = PineconeVectorStore(
     embedding=embeddings
 )
 
-retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+retriever = vectorstore.as_retriever(search_kwargs={"k": 20})
 llm = ChatOpenAI(model="gpt-4", temperature=0)
 
 prompt = ChatPromptTemplate.from_template("""
