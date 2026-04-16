@@ -26,13 +26,35 @@ vectorstore = PineconeVectorStore(
 retriever = vectorstore.as_retriever(search_kwargs={"k": 20})
 llm = ChatOpenAI(model="gpt-4", temperature=0)
 
-prompt = ChatPromptTemplate.from_template("""
-Answer the question based only on the following context:
-{context}
+# --- Query Rewriter ---
+rewrite_prompt = ChatPromptTemplate.from_template("""
+You are an IES lighting expert. Rewrite the following question using 
+technical IES Lighting Handbook terminology to improve search results.
+Include relevant terms like: illuminance, lux, footcandles, horizontal, 
+vertical, transition spaces, table references.
 
-Question: {question}
+Original question: {question}
+Rewritten question:
 """)
 
+rewrite_chain = rewrite_prompt | llm | StrOutputParser()
+
+# --- Answer Prompt ---
+prompt = ChatPromptTemplate.from_template("""
+You are an expert on the IES Lighting Handbook 10th Edition. 
+Use the following context to answer the question. 
+If the context references a table by name, use your knowledge of IES 
+lighting standards to provide the specific values from that table.
+If you cannot find exact values, provide general IES guidance on the topic.
+
+Context: {context}
+
+Question: {question}
+
+Provide specific lux or footcandle values where relevant.
+""")
+
+# --- Chain ---
 chain = (
     {"context": retriever, "question": RunnablePassthrough()}
     | prompt
@@ -48,15 +70,8 @@ query = st.text_input("Your question:")
 
 if query:
     with st.spinner("Searching the IES Lighting Handbook..."):
-        # Debug: show retrieved documents
-        docs = retriever.invoke(query)
-        st.write(f"**Retrieved {len(docs)} documents:**")
-        for i, doc in enumerate(docs):
-            st.write(f"**Chunk {i+1}:**")
-            st.write(doc.page_content[:300])
-            st.divider()
-
-        # Answer
-        response = chain.invoke(query)
+        technical_query = rewrite_chain.invoke({"question": query})
+        docs = retriever.invoke(technical_query)
+        response = chain.invoke(technical_query)
         st.write("**Answer:**")
         st.write(response)
