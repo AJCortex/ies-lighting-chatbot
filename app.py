@@ -47,6 +47,10 @@ If the context references a table by name, use your knowledge of IES
 lighting standards to provide the specific values from that table.
 If you cannot find exact values, provide general IES guidance on the topic.
 
+IMPORTANT: Do not reference document IDs, chunk IDs, or any internal 
+identifiers in your response. Only cite table numbers and page numbers 
+when referencing sources.
+
 Context: {context}
 
 Question: {question}
@@ -71,7 +75,6 @@ query = st.text_input("Your question:")
 if query:
     with st.spinner("Searching the IES Lighting Handbook..."):
         technical_query = rewrite_chain.invoke({"question": query})
-        
         response = chain.invoke(technical_query)
         st.write("**Answer:**")
         st.write(response)
